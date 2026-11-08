@@ -1,6 +1,6 @@
 // errorHandler.js
 //
-// TASK 4 — The ONE place every error is turned into an HTTP response.
+// Task 4 — The ONE place every error is turned into an HTTP response.
 // Express recognises this as the error handler ONLY because it has FOUR
 // parameters: (err, req, res, next). Keep all four, even if you don't use next.
 //
@@ -11,17 +11,27 @@
 //   anything else          -> 500 (already done for you — log it, hide details)
 
 export function errorHandler(err, req, res, next) {
-  // TODO 4a: if (err.name === "ValidationError") -> 400 with a { field: message } map
-  //   const fields = {};
-  //   for (const key in err.errors) fields[key] = err.errors[key].message;
-  //   return res.status(400).json({ error: "ValidationError", fields });
+  // 4a: ValidationError -> 400 with a { field: message } map
+  if (err.name === "ValidationError") {
+    const fields = {};
+    for (const key in err.errors) fields[key] = err.errors[key].message;
+    return res.status(400).json({ error: "ValidationError", fields });
+  }
 
-  // TODO 4b: if (err.name === "CastError") -> 400
-  //   return res.status(400).json({ error: "CastError", message: "Invalid ID format", field: err.path });
+  // 4b: CastError -> 400 with "Invalid ID format"
+  if (err.name === "CastError") {
+    return res
+      .status(400)
+      .json({ error: "CastError", message: "Invalid ID format", field: err.path });
+  }
 
-  // TODO 4c: if (err.code === 11000) -> 409
-  //   const field = Object.keys(err.keyValue)[0];
-  //   return res.status(409).json({ error: "DuplicateKey", message: field + " already exists", field });
+  // 4c: Duplicate key (11000) -> 409
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyValue)[0];
+    return res
+      .status(409)
+      .json({ error: "DuplicateKey", message: `${field} already exists`, field });
+  }
 
   // Fallback (provided) — unknown error.
   console.error(err);
